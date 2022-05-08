@@ -12,7 +12,7 @@ router.post("/register", async (req, res) => {
       process.env.CRYPTO_SECRET
     ).toString(),
   });
- 
+
   try {
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
@@ -23,16 +23,25 @@ router.post("/register", async (req, res) => {
 
 //LOGIN
 router.post("/login", async (req, res) => {
-    const _username = req.body.username;
-    const _password = req.body.password;
-    
-    try {
-      const user = await User.findOne({username: _username});
-      const decryptedPassword = CryptoJS.AES.decrypt(user.password, process.env.CRYPTO_SECRET);
+  try {
+    const user = await User.findOne({ username: req.body.username });
+    if (!user) res.status(401).json("User doen't exist!");
+    else {
+      const encryptedPassword = CryptoJs.AES.decrypt(
+        user.password,
+        process.env.CRYPTO_SECRET
+      );
+      const password = encryptedPassword.toString(CryptoJs.enc.Utf8);
       
-    } catch (err) {
-      res.status(500).json(err);
+      if (req.body.password !== password)
+        res.status(401).json("Wrong Password!");
+      else {
+        res.status(200).json(user);
+      }
     }
-  });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 module.exports = router;
