@@ -63,7 +63,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
   }
 });
 
-//Stats on income routes
+//Stats on income
 router.get("/income", verifyTokenAndAdmin, async (req, res) => {
   const date = new Date();
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
