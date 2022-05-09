@@ -13,7 +13,7 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-//UPDATE A CART BY ID
+//UPDATE A Order BY ID
 router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
   try {
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -29,7 +29,7 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
   }
 });
 
-//DELETE CART by ID
+//DELETE Order by ID
 router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
   try {
     await Order.findByIdAndDelete(req.params.id);
@@ -49,7 +49,7 @@ router.get("/find/:userId", verifyTokenAndAuthorisation, async (req, res) => {
   }
 });
 
-//GET ALL CARTS
+//GET ALL Orders
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
   
   try {
@@ -59,5 +59,23 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+//Stats on income routes
+router.get("/income", verifyTokenAndAdmin, (req, res)=>{
+  const date = new Date();
+  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
+  const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
+
+  try {
+    const income = await Orders.aggregate([
+      { $match: { createdAt: { $gte: previousMonth } } },
+      { $project: { month: { $month: "$createdAt" }, sales: "$amount" } },
+      { $group: { _id: "$month", total: { $sum: "$sales" } } },
+    ]);
+    res.status(200).json(income);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+})
 
 module.exports = router;
