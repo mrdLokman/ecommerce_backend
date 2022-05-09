@@ -1,4 +1,8 @@
-const { verifyTokenAndAdmin, verifyToken, verifyTokenAndAuthorisation } = require("./verifyToken");
+const {
+  verifyTokenAndAdmin,
+  verifyToken,
+  verifyTokenAndAuthorisation,
+} = require("./verifyToken");
 const Order = require("../models/Order");
 const router = require("express").Router();
 
@@ -42,7 +46,7 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 //GET USER Orders
 router.get("/find/:userId", verifyTokenAndAuthorisation, async (req, res) => {
   try {
-    const orders = await Order.find({userId: req.params.id});
+    const orders = await Order.find({ userId: req.params.userId });
     res.status(200).json(orders);
   } catch (err) {
     res.status(500).json(err);
@@ -51,7 +55,6 @@ router.get("/find/:userId", verifyTokenAndAuthorisation, async (req, res) => {
 
 //GET ALL Orders
 router.get("/", verifyTokenAndAdmin, async (req, res) => {
-  
   try {
     const orders = await Order.find().sort({ _id: -1 });
     res.status(200).json(orders);
@@ -61,21 +64,21 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
 });
 
 //Stats on income routes
-router.get("/income", verifyTokenAndAdmin, (req, res)=>{
+router.get("/income", verifyTokenAndAdmin, async (req, res) => {
   const date = new Date();
-  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
-  const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
+  const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
 
   try {
-    const income = await Orders.aggregate([
-      { $match: { createdAt: { $gte: previousMonth } } },
+    const income = await Order.aggregate([
+      { $match: { createdAt: { $gte: lastYear } } },
       { $project: { month: { $month: "$createdAt" }, sales: "$amount" } },
-      { $group: { _id: "$month", total: { $sum: "$sales" } } },
+      { $group: { _id: "$month", total: { $sum: "$sales" } }}
     ]);
+    console.log(income);
     res.status(200).json(income);
   } catch (err) {
     res.status(500).json(err);
   }
-})
+});
 
 module.exports = router;
