@@ -40,7 +40,7 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 //GET PRODUCT by ID
-router.get("/find/:id", verifyToken, async (req, res) => {
+router.get("/find/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     res.status(200).json(product);
@@ -50,7 +50,7 @@ router.get("/find/:id", verifyToken, async (req, res) => {
 });
 
 //GET ALL PRODUCTS
-router.get("/", verifyTokenAndAdmin, async (req, res) => {
+router.get("/", async (req, res) => {
   const qLimit = req.query.limit;
   const qCategory = req.query.category;
   try {
